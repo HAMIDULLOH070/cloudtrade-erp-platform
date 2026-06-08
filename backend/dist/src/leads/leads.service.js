@@ -93,18 +93,25 @@ let LeadsService = class LeadsService {
                 value: true,
             },
         });
-        const stages = ['NEW', 'CONTACTED', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST'];
+        const stages = [
+            'NEW',
+            'CONTACTED',
+            'PROPOSAL',
+            'NEGOTIATION',
+            'WON',
+            'LOST',
+        ];
         const summary = stages.reduce((acc, stage) => {
             acc[stage] = { count: 0, value: 0 };
             return acc;
         }, {});
-        leads.forEach(l => {
+        leads.forEach((l) => {
             if (summary[l.status]) {
                 summary[l.status].count++;
                 summary[l.status].value += l.value;
             }
         });
-        return Object.keys(summary).map(key => ({
+        return Object.keys(summary).map((key) => ({
             stage: key,
             count: summary[key].count,
             value: Math.round(summary[key].value * 100) / 100,

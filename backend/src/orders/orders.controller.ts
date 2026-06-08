@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -32,7 +42,11 @@ export class OrdersController {
 
   @Put(':id')
   @Roles('Admin', 'Sales Staff', 'Manager')
-  async updateOrder(@Param('id') id: string, @Body() data: any, @Req() req: any) {
+  async updateOrder(
+    @Param('id') id: string,
+    @Body() data: any,
+    @Req() req: any,
+  ) {
     return this.ordersService.updateOrder(id, data, req.user.id);
   }
 }

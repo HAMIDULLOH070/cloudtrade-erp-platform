@@ -59,6 +59,12 @@ let CustomersService = class CustomersService {
         });
     }
     async create(data) {
+        if (data.creditLimit !== undefined && isNaN(Number(data.creditLimit))) {
+            throw new common_1.BadRequestException("Kredit limiti to'g'ri raqam bo'lishi shart.");
+        }
+        if (data.debt !== undefined && isNaN(Number(data.debt))) {
+            throw new common_1.BadRequestException("Qarzdorlik miqdori to'g'ri raqam bo'lishi shart.");
+        }
         return this.prisma.customer.create({
             data: {
                 name: data.name,
@@ -73,6 +79,12 @@ let CustomersService = class CustomersService {
         });
     }
     async update(id, data) {
+        if (data.creditLimit !== undefined && isNaN(Number(data.creditLimit))) {
+            throw new common_1.BadRequestException("Kredit limiti to'g'ri raqam bo'lishi shart.");
+        }
+        if (data.debt !== undefined && isNaN(Number(data.debt))) {
+            throw new common_1.BadRequestException("Qarzdorlik miqdori to'g'ri raqam bo'lishi shart.");
+        }
         return this.prisma.customer.update({
             where: { id },
             data: {
@@ -97,7 +109,7 @@ let CustomersService = class CustomersService {
             select: { category: true },
             distinct: ['category'],
         });
-        return categories.map(c => c.category);
+        return categories.map((c) => c.category);
     }
 };
 exports.CustomersService = CustomersService;

@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class CustomersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(query: { category?: string; search?: string; page?: string; limit?: string }) {
+  async findAll(query: {
+    category?: string;
+    search?: string;
+    page?: string;
+    limit?: string;
+  }) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -52,6 +57,12 @@ export class CustomersService {
   }
 
   async create(data: any) {
+    if (data.creditLimit !== undefined && isNaN(Number(data.creditLimit))) {
+      throw new BadRequestException("Kredit limiti to'g'ri raqam bo'lishi shart.");
+    }
+    if (data.debt !== undefined && isNaN(Number(data.debt))) {
+      throw new BadRequestException("Qarzdorlik miqdori to'g'ri raqam bo'lishi shart.");
+    }
     return this.prisma.customer.create({
       data: {
         name: data.name,
@@ -60,13 +71,20 @@ export class CustomersService {
         phone: data.phone,
         address: data.address,
         category: data.category,
-        creditLimit: data.creditLimit !== undefined ? Number(data.creditLimit) : 10000,
+        creditLimit:
+          data.creditLimit !== undefined ? Number(data.creditLimit) : 10000,
         debt: data.debt !== undefined ? Number(data.debt) : 0,
       },
     });
   }
 
   async update(id: string, data: any) {
+    if (data.creditLimit !== undefined && isNaN(Number(data.creditLimit))) {
+      throw new BadRequestException("Kredit limiti to'g'ri raqam bo'lishi shart.");
+    }
+    if (data.debt !== undefined && isNaN(Number(data.debt))) {
+      throw new BadRequestException("Qarzdorlik miqdori to'g'ri raqam bo'lishi shart.");
+    }
     return this.prisma.customer.update({
       where: { id },
       data: {
@@ -76,7 +94,8 @@ export class CustomersService {
         phone: data.phone,
         address: data.address,
         category: data.category,
-        creditLimit: data.creditLimit !== undefined ? Number(data.creditLimit) : undefined,
+        creditLimit:
+          data.creditLimit !== undefined ? Number(data.creditLimit) : undefined,
         debt: data.debt !== undefined ? Number(data.debt) : undefined,
       },
     });
@@ -93,6 +112,6 @@ export class CustomersService {
       select: { category: true },
       distinct: ['category'],
     });
-    return categories.map(c => c.category);
+    return categories.map((c) => c.category);
   }
 }

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -9,7 +13,12 @@ export class OrdersService {
   // SALES ORDERS
   // ==========================================
 
-  async findAllOrders(query: { status?: string; search?: string; page?: string; limit?: string }) {
+  async findAllOrders(query: {
+    status?: string;
+    search?: string;
+    page?: string;
+    limit?: string;
+  }) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -59,21 +68,37 @@ export class OrdersService {
   }
 
   async createOrder(data: any, userId: string) {
+    if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+      throw new BadRequestException("Buyurtma uchun kamida bitta mahsulot tanlanishi kerak (Items array is required and cannot be empty).");
+    }
+
     // Check if customer exists
     const customer = await this.prisma.customer.findUnique({
       where: { id: data.customerId },
     });
     if (!customer) throw new NotFoundException('Customer not found');
 
-    // Generate random order number
-    const count = await this.prisma.order.count();
-    const orderNumber = `SO-${7000 + count + 1}`;
+    // Generate safe order number by looking up the latest order number
+    const latestOrder = await this.prisma.order.findFirst({
+      orderBy: { createdAt: 'desc' },
+    });
+    let nextNum = 7001;
+    if (latestOrder && latestOrder.orderNumber.startsWith('SO-')) {
+      const lastNum = parseInt(latestOrder.orderNumber.replace('SO-', ''), 10);
+      if (!isNaN(lastNum)) {
+        nextNum = lastNum + 1;
+      }
+    }
+    const orderNumber = `SO-${nextNum}`;
 
     // Calculate subtotal
     let subtotal = 0;
     for (const item of data.items) {
-      const product = await this.prisma.product.findUnique({ where: { id: item.productId } });
-      if (!product) throw new NotFoundException(`Product ${item.productId} not found`);
+      const product = await this.prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+      if (!product)
+        throw new NotFoundException(`Product ${item.productId} not found`);
       subtotal += product.price * item.quantity;
     }
 
@@ -104,7 +129,13 @@ export class OrdersService {
       });
 
       if (data.status === 'COMPLETED') {
-        await this.completeSalesOrderOperations(tx, createdOrder, data.items, customer.id, userId);
+        await this.completeSalesOrderOperations(
+          tx,
+          createdOrder,
+          data.items,
+          customer.id,
+          userId,
+        );
       }
 
       return createdOrder;
@@ -135,12 +166,18 @@ export class OrdersService {
 
       // If status changed to completed, trigger inventory reduction and invoice
       if (existingOrder.status !== 'COMPLETED' && data.status === 'COMPLETED') {
-        const items = existingOrder.items.map(i => ({
+        const items = existingOrder.items.map((i) => ({
           productId: i.productId,
           quantity: i.quantity,
           price: i.price,
         }));
-        await this.completeSalesOrderOperations(tx, updatedOrder, items, existingOrder.customerId, userId);
+        await this.completeSalesOrderOperations(
+          tx,
+          updatedOrder,
+          items,
+          existingOrder.customerId,
+          userId,
+        );
       }
 
       return updatedOrder;
@@ -149,13 +186,22 @@ export class OrdersService {
     return order;
   }
 
-  private async completeSalesOrderOperations(tx: any, order: any, items: any[], customerId: string, userId: string) {
+  private async completeSalesOrderOperations(
+    tx: any,
+    order: any,
+    items: any[],
+    customerId: string,
+    userId: string,
+  ) {
     for (const item of items) {
       // Find product category to get zone
-      const product = await tx.product.findUnique({ where: { id: item.productId } });
+      const product = await tx.product.findUnique({
+        where: { id: item.productId },
+      });
       let zone = 'ZONE-A';
       if (product.category === 'Jeans') zone = 'ZONE-B';
-      else if (product.category === 'Jackets' || product.category === 'Hoodies') zone = 'ZONE-C';
+      else if (product.category === 'Jackets' || product.category === 'Hoodies')
+        zone = 'ZONE-C';
       else if (product.category === 'Shirts') zone = 'ZONE-D';
 
       // Decrement stock
@@ -177,9 +223,18 @@ export class OrdersService {
       });
     }
 
-    // Create Invoice
-    const invoiceCount = await tx.invoice.count();
-    const invoiceNumber = `INV-${5000 + invoiceCount + 1}`;
+    // Create Invoice safely
+    const latestInvoice = await tx.invoice.findFirst({
+      orderBy: { createdAt: 'desc' },
+    });
+    let nextInvoiceNum = 5001;
+    if (latestInvoice && latestInvoice.invoiceNumber.startsWith('INV-')) {
+      const lastInvoiceNum = parseInt(latestInvoice.invoiceNumber.replace('INV-', ''), 10);
+      if (!isNaN(lastInvoiceNum)) {
+        nextInvoiceNum = lastInvoiceNum + 1;
+      }
+    }
+    const invoiceNumber = `INV-${nextInvoiceNum}`;
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 30);
 
@@ -204,7 +259,12 @@ export class OrdersService {
   // PURCHASE ORDERS
   // ==========================================
 
-  async findAllPurchaseOrders(query: { status?: string; search?: string; page?: string; limit?: string }) {
+  async findAllPurchaseOrders(query: {
+    status?: string;
+    search?: string;
+    page?: string;
+    limit?: string;
+  }) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -253,18 +313,34 @@ export class OrdersService {
   }
 
   async createPurchaseOrder(data: any, userId: string) {
+    if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+      throw new BadRequestException("Xarid buyurtmasi uchun kamida bitta mahsulot tanlanishi kerak (Items array is required and cannot be empty).");
+    }
+
     const supplier = await this.prisma.supplier.findUnique({
       where: { id: data.supplierId },
     });
     if (!supplier) throw new NotFoundException('Supplier not found');
 
-    const count = await this.prisma.purchaseOrder.count();
-    const poNumber = `PO-${4000 + count + 1}`;
+    const latestPO = await this.prisma.purchaseOrder.findFirst({
+      orderBy: { createdAt: 'desc' },
+    });
+    let nextPoNum = 4001;
+    if (latestPO && latestPO.poNumber.startsWith('PO-')) {
+      const lastPoNum = parseInt(latestPO.poNumber.replace('PO-', ''), 10);
+      if (!isNaN(lastPoNum)) {
+        nextPoNum = lastPoNum + 1;
+      }
+    }
+    const poNumber = `PO-${nextPoNum}`;
 
     let totalAmount = 0;
     for (const item of data.items) {
-      const product = await this.prisma.product.findUnique({ where: { id: item.productId } });
-      if (!product) throw new NotFoundException(`Product ${item.productId} not found`);
+      const product = await this.prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+      if (!product)
+        throw new NotFoundException(`Product ${item.productId} not found`);
       totalAmount += product.cost * item.quantity;
     }
 
@@ -287,7 +363,12 @@ export class OrdersService {
       });
 
       if (data.status === 'RECEIVED') {
-        await this.receivePurchaseOrderOperations(tx, createdPO, data.items, userId);
+        await this.receivePurchaseOrderOperations(
+          tx,
+          createdPO,
+          data.items,
+          userId,
+        );
       }
 
       return createdPO;
@@ -317,7 +398,7 @@ export class OrdersService {
       });
 
       if (existingPO.status !== 'RECEIVED' && data.status === 'RECEIVED') {
-        const items = existingPO.items.map(i => ({
+        const items = existingPO.items.map((i) => ({
           productId: i.productId,
           quantity: i.quantity,
           cost: i.cost,
@@ -331,12 +412,20 @@ export class OrdersService {
     return po;
   }
 
-  private async receivePurchaseOrderOperations(tx: any, po: any, items: any[], userId: string) {
+  private async receivePurchaseOrderOperations(
+    tx: any,
+    po: any,
+    items: any[],
+    userId: string,
+  ) {
     for (const item of items) {
-      const product = await tx.product.findUnique({ where: { id: item.productId } });
+      const product = await tx.product.findUnique({
+        where: { id: item.productId },
+      });
       let zone = 'ZONE-A';
       if (product.category === 'Jeans') zone = 'ZONE-B';
-      else if (product.category === 'Jackets' || product.category === 'Hoodies') zone = 'ZONE-C';
+      else if (product.category === 'Jackets' || product.category === 'Hoodies')
+        zone = 'ZONE-C';
       else if (product.category === 'Shirts') zone = 'ZONE-D';
 
       // Increment stock

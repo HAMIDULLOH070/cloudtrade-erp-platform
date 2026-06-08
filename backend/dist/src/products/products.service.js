@@ -56,6 +56,12 @@ let ProductsService = class ProductsService {
         });
     }
     async create(data) {
+        if (data.price === undefined || isNaN(Number(data.price))) {
+            throw new common_1.BadRequestException("Mahsulot narxi to'g'ri raqam bo'lishi shart.");
+        }
+        if (data.cost === undefined || isNaN(Number(data.cost))) {
+            throw new common_1.BadRequestException("Mahsulot tannarxi to'g'ri raqam bo'lishi shart.");
+        }
         return this.prisma.product.create({
             data: {
                 name: data.name,
@@ -72,6 +78,12 @@ let ProductsService = class ProductsService {
         });
     }
     async update(id, data) {
+        if (data.price !== undefined && isNaN(Number(data.price))) {
+            throw new common_1.BadRequestException("Mahsulot narxi to'g'ri raqam bo'lishi shart.");
+        }
+        if (data.cost !== undefined && isNaN(Number(data.cost))) {
+            throw new common_1.BadRequestException("Mahsulot tannarxi to'g'ri raqam bo'lishi shart.");
+        }
         return this.prisma.product.update({
             where: { id },
             data: {
@@ -83,7 +95,9 @@ let ProductsService = class ProductsService {
                 color: data.color,
                 price: data.price !== undefined ? Number(data.price) : undefined,
                 cost: data.cost !== undefined ? Number(data.cost) : undefined,
-                quantityInStock: data.quantityInStock !== undefined ? Number(data.quantityInStock) : undefined,
+                quantityInStock: data.quantityInStock !== undefined
+                    ? Number(data.quantityInStock)
+                    : undefined,
                 supplierId: data.supplierId,
             },
         });
@@ -98,7 +112,7 @@ let ProductsService = class ProductsService {
             select: { category: true },
             distinct: ['category'],
         });
-        return categories.map(c => c.category);
+        return categories.map((c) => c.category);
     }
 };
 exports.ProductsService = ProductsService;

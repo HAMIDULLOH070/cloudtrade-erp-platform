@@ -24,7 +24,12 @@ let PurchaseOrdersController = class PurchaseOrdersController {
         this.ordersService = ordersService;
     }
     async findAllPurchaseOrders(status, search, page, limit) {
-        return this.ordersService.findAllPurchaseOrders({ status, search, page, limit });
+        return this.ordersService.findAllPurchaseOrders({
+            status,
+            search,
+            page,
+            limit,
+        });
     }
     async findOnePurchaseOrder(id) {
         return this.ordersService.findOnePurchaseOrder(id);

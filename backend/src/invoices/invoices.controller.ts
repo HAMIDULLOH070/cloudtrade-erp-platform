@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Param, Body, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -18,7 +26,12 @@ export class InvoicesController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    return this.invoicesService.findAllInvoices({ status, search, page, limit });
+    return this.invoicesService.findAllInvoices({
+      status,
+      search,
+      page,
+      limit,
+    });
   }
 
   @Get('invoices/:id')

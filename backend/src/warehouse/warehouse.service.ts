@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -11,7 +15,12 @@ export class WarehouseService {
     });
   }
 
-  async getMovements(query: { type?: string; productId?: string; page?: string; limit?: string }) {
+  async getMovements(query: {
+    type?: string;
+    productId?: string;
+    page?: string;
+    limit?: string;
+  }) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -65,15 +74,21 @@ export class WarehouseService {
     const { productId, quantity, fromZone, toZone } = data;
     const qty = Number(quantity);
 
-    if (qty <= 0) throw new BadRequestException('Transfer quantity must be greater than 0');
-    if (fromZone === toZone) throw new BadRequestException('Source and destination zones must be different');
+    if (qty <= 0)
+      throw new BadRequestException('Transfer quantity must be greater than 0');
+    if (fromZone === toZone)
+      throw new BadRequestException(
+        'Source and destination zones must be different',
+      );
 
     const product = await this.prisma.product.findUnique({
       where: { id: productId },
     });
     if (!product) throw new NotFoundException('Product not found');
     if (product.quantityInStock < qty) {
-      throw new BadRequestException(`Insufficient stock in ${fromZone}. Available: ${product.quantityInStock}`);
+      throw new BadRequestException(
+        `Insufficient stock in ${fromZone}. Available: ${product.quantityInStock}`,
+      );
     }
 
     const result = await this.prisma.$transaction(async (tx) => {
@@ -93,7 +108,9 @@ export class WarehouseService {
       // Update zone usages
       const zonesToUpdate = [fromZone, toZone];
       for (const zCode of zonesToUpdate) {
-        const zone = await tx.warehouseZone.findUnique({ where: { code: zCode } });
+        const zone = await tx.warehouseZone.findUnique({
+          where: { code: zCode },
+        });
         if (zone) {
           const delta = zCode === fromZone ? -qty : qty;
           await tx.warehouseZone.update({

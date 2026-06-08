@@ -34,19 +34,67 @@ export class CloudMonitoringService {
 
   async getScalingLogs() {
     return [
-      { id: '1', timestamp: new Date(Date.now() - 15 * 60000).toISOString(), event: 'Scale Out', details: 'ERP asosiy serverining auto-scaling guruhiga 1 ta namuna qo\'shildi. Sababi: 5 daqiqa davomida CPU yuklanishi > 80%.' },
-      { id: '2', timestamp: new Date(Date.now() - 3 * 3600000).toISOString(), event: 'Scale In', details: 'ERP asosiy serverining auto-scaling guruhidan 1 ta namuna olib tashlandi. Sababi: 15 daqiqa davomida CPU yuklanishi < 25%.' },
-      { id: '3', timestamp: new Date(Date.now() - 12 * 3600000).toISOString(), event: 'Scale Out', details: 'CDN tugunlari ro\'yxatiga 2 ta namuna qo\'shildi. Sababi: Yevropa CDN keshlaridan yuqori trafik yuklanishi.' },
-      { id: '4', timestamp: new Date(Date.now() - 24 * 3600000).toISOString(), event: 'Scale In', details: 'CDN tugunlari ro\'yxatidan 1 ta namuna olib tashlandi. Sababi: Past trafik chegarasiga erishildi.' }
+      {
+        id: '1',
+        timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
+        event: 'Scale Out',
+        details:
+          "ERP asosiy serverining auto-scaling guruhiga 1 ta namuna qo'shildi. Sababi: 5 daqiqa davomida CPU yuklanishi > 80%.",
+      },
+      {
+        id: '2',
+        timestamp: new Date(Date.now() - 3 * 3600000).toISOString(),
+        event: 'Scale In',
+        details:
+          'ERP asosiy serverining auto-scaling guruhidan 1 ta namuna olib tashlandi. Sababi: 15 daqiqa davomida CPU yuklanishi < 25%.',
+      },
+      {
+        id: '3',
+        timestamp: new Date(Date.now() - 12 * 3600000).toISOString(),
+        event: 'Scale Out',
+        details:
+          "CDN tugunlari ro'yxatiga 2 ta namuna qo'shildi. Sababi: Yevropa CDN keshlaridan yuqori trafik yuklanishi.",
+      },
+      {
+        id: '4',
+        timestamp: new Date(Date.now() - 24 * 3600000).toISOString(),
+        event: 'Scale In',
+        details:
+          "CDN tugunlari ro'yxatidan 1 ta namuna olib tashlandi. Sababi: Past trafik chegarasiga erishildi.",
+      },
     ];
   }
- 
+
   async getSecurityLogs() {
     return [
-      { id: '1', timestamp: new Date(Date.now() - 5 * 60000).toISOString(), severity: 'LOW', message: 'IP 192.168.4.15 manzildan mijozlar fikr-mulohazalari formasida SQL-in\'ektsiya urinishi to\'sildi.' },
-      { id: '2', timestamp: new Date(Date.now() - 40 * 60000).toISOString(), severity: 'MEDIUM', message: 'DDoS hujumini yumshatish faol. /auth/login manziliga murojaat qilayotgan 14 ta IP uchun so\'rovlar chastotasi cheklandi.' },
-      { id: '3', timestamp: new Date(Date.now() - 2 * 3600000).toISOString(), severity: 'LOW', message: 'IP 203.0.113.120 manzildan SSH orqali "root" foydalanuvchisi sifatida kirish urinishi muvaffaqiyatsiz tugadi.' },
-      { id: '4', timestamp: new Date(Date.now() - 8 * 3600000).toISOString(), severity: 'HIGH', message: 'Yopiq tarmoqdagi ma\'lumotlar bazasi serveriga nisbatan portlarni skanerlash urinishi bloklandi.' }
+      {
+        id: '1',
+        timestamp: new Date(Date.now() - 5 * 60000).toISOString(),
+        severity: 'LOW',
+        message:
+          "IP 192.168.4.15 manzildan mijozlar fikr-mulohazalari formasida SQL-in'ektsiya urinishi to'sildi.",
+      },
+      {
+        id: '2',
+        timestamp: new Date(Date.now() - 40 * 60000).toISOString(),
+        severity: 'MEDIUM',
+        message:
+          "DDoS hujumini yumshatish faol. /auth/login manziliga murojaat qilayotgan 14 ta IP uchun so'rovlar chastotasi cheklandi.",
+      },
+      {
+        id: '3',
+        timestamp: new Date(Date.now() - 2 * 3600000).toISOString(),
+        severity: 'LOW',
+        message:
+          'IP 203.0.113.120 manzildan SSH orqali "root" foydalanuvchisi sifatida kirish urinishi muvaffaqiyatsiz tugadi.',
+      },
+      {
+        id: '4',
+        timestamp: new Date(Date.now() - 8 * 3600000).toISOString(),
+        severity: 'HIGH',
+        message:
+          "Yopiq tarmoqdagi ma'lumotlar bazasi serveriga nisbatan portlarni skanerlash urinishi bloklandi.",
+      },
     ];
   }
 
@@ -71,7 +119,7 @@ export class CloudMonitoringService {
         requestsCount: reqs,
         errorsCount: errs,
         activeConnections: reqs * 2,
-      }
+      },
     });
 
     return { simulateHighLoad: this.simulateHighLoad };
@@ -82,7 +130,10 @@ export class CloudMonitoringService {
     const metrics = await this.getMetrics(1);
     const lastMetric = metrics[metrics.length - 1];
 
-    const alertsCount = lastMetric && (lastMetric.cpuUsage > 80 || lastMetric.errorsCount > 3) ? 1 : 0;
+    const alertsCount =
+      lastMetric && (lastMetric.cpuUsage > 80 || lastMetric.errorsCount > 3)
+        ? 1
+        : 0;
 
     return {
       status: alertsCount > 0 ? 'WARNING' : 'HEALTHY',
@@ -91,7 +142,7 @@ export class CloudMonitoringService {
       apiResponseTime: lastMetric ? lastMetric.apiResponseTime : 0,
       uptime: 99.98,
       resourcesCount: resources.length,
-      simulateHighLoad: this.simulateHighLoad
+      simulateHighLoad: this.simulateHighLoad,
     };
   }
 }

@@ -96,7 +96,9 @@ let WarehouseService = class WarehouseService {
             });
             const zonesToUpdate = [fromZone, toZone];
             for (const zCode of zonesToUpdate) {
-                const zone = await tx.warehouseZone.findUnique({ where: { code: zCode } });
+                const zone = await tx.warehouseZone.findUnique({
+                    where: { code: zCode },
+                });
                 if (zone) {
                     const delta = zCode === fromZone ? -qty : qty;
                     await tx.warehouseZone.update({

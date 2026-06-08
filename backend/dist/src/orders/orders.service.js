@@ -63,16 +63,30 @@ let OrdersService = class OrdersService {
         return order;
     }
     async createOrder(data, userId) {
+        if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+            throw new common_1.BadRequestException("Buyurtma uchun kamida bitta mahsulot tanlanishi kerak (Items array is required and cannot be empty).");
+        }
         const customer = await this.prisma.customer.findUnique({
             where: { id: data.customerId },
         });
         if (!customer)
             throw new common_1.NotFoundException('Customer not found');
-        const count = await this.prisma.order.count();
-        const orderNumber = `SO-${7000 + count + 1}`;
+        const latestOrder = await this.prisma.order.findFirst({
+            orderBy: { createdAt: 'desc' },
+        });
+        let nextNum = 7001;
+        if (latestOrder && latestOrder.orderNumber.startsWith('SO-')) {
+            const lastNum = parseInt(latestOrder.orderNumber.replace('SO-', ''), 10);
+            if (!isNaN(lastNum)) {
+                nextNum = lastNum + 1;
+            }
+        }
+        const orderNumber = `SO-${nextNum}`;
         let subtotal = 0;
         for (const item of data.items) {
-            const product = await this.prisma.product.findUnique({ where: { id: item.productId } });
+            const product = await this.prisma.product.findUnique({
+                where: { id: item.productId },
+            });
             if (!product)
                 throw new common_1.NotFoundException(`Product ${item.productId} not found`);
             subtotal += product.price * item.quantity;
@@ -126,7 +140,7 @@ let OrdersService = class OrdersService {
                 include: { items: true },
             });
             if (existingOrder.status !== 'COMPLETED' && data.status === 'COMPLETED') {
-                const items = existingOrder.items.map(i => ({
+                const items = existingOrder.items.map((i) => ({
                     productId: i.productId,
                     quantity: i.quantity,
                     price: i.price,
@@ -139,7 +153,9 @@ let OrdersService = class OrdersService {
     }
     async completeSalesOrderOperations(tx, order, items, customerId, userId) {
         for (const item of items) {
-            const product = await tx.product.findUnique({ where: { id: item.productId } });
+            const product = await tx.product.findUnique({
+                where: { id: item.productId },
+            });
             let zone = 'ZONE-A';
             if (product.category === 'Jeans')
                 zone = 'ZONE-B';
@@ -162,8 +178,17 @@ let OrdersService = class OrdersService {
                 },
             });
         }
-        const invoiceCount = await tx.invoice.count();
-        const invoiceNumber = `INV-${5000 + invoiceCount + 1}`;
+        const latestInvoice = await tx.invoice.findFirst({
+            orderBy: { createdAt: 'desc' },
+        });
+        let nextInvoiceNum = 5001;
+        if (latestInvoice && latestInvoice.invoiceNumber.startsWith('INV-')) {
+            const lastInvoiceNum = parseInt(latestInvoice.invoiceNumber.replace('INV-', ''), 10);
+            if (!isNaN(lastInvoiceNum)) {
+                nextInvoiceNum = lastInvoiceNum + 1;
+            }
+        }
+        const invoiceNumber = `INV-${nextInvoiceNum}`;
         const dueDate = new Date();
         dueDate.setDate(dueDate.getDate() + 30);
         await tx.invoice.create({
@@ -225,16 +250,30 @@ let OrdersService = class OrdersService {
         return po;
     }
     async createPurchaseOrder(data, userId) {
+        if (!data.items || !Array.isArray(data.items) || data.items.length === 0) {
+            throw new common_1.BadRequestException("Xarid buyurtmasi uchun kamida bitta mahsulot tanlanishi kerak (Items array is required and cannot be empty).");
+        }
         const supplier = await this.prisma.supplier.findUnique({
             where: { id: data.supplierId },
         });
         if (!supplier)
             throw new common_1.NotFoundException('Supplier not found');
-        const count = await this.prisma.purchaseOrder.count();
-        const poNumber = `PO-${4000 + count + 1}`;
+        const latestPO = await this.prisma.purchaseOrder.findFirst({
+            orderBy: { createdAt: 'desc' },
+        });
+        let nextPoNum = 4001;
+        if (latestPO && latestPO.poNumber.startsWith('PO-')) {
+            const lastPoNum = parseInt(latestPO.poNumber.replace('PO-', ''), 10);
+            if (!isNaN(lastPoNum)) {
+                nextPoNum = lastPoNum + 1;
+            }
+        }
+        const poNumber = `PO-${nextPoNum}`;
         let totalAmount = 0;
         for (const item of data.items) {
-            const product = await this.prisma.product.findUnique({ where: { id: item.productId } });
+            const product = await this.prisma.product.findUnique({
+                where: { id: item.productId },
+            });
             if (!product)
                 throw new common_1.NotFoundException(`Product ${item.productId} not found`);
             totalAmount += product.cost * item.quantity;
@@ -282,7 +321,7 @@ let OrdersService = class OrdersService {
                 include: { items: true },
             });
             if (existingPO.status !== 'RECEIVED' && data.status === 'RECEIVED') {
-                const items = existingPO.items.map(i => ({
+                const items = existingPO.items.map((i) => ({
                     productId: i.productId,
                     quantity: i.quantity,
                     cost: i.cost,
@@ -295,7 +334,9 @@ let OrdersService = class OrdersService {
     }
     async receivePurchaseOrderOperations(tx, po, items, userId) {
         for (const item of items) {
-            const product = await tx.product.findUnique({ where: { id: item.productId } });
+            const product = await tx.product.findUnique({
+                where: { id: item.productId },
+            });
             let zone = 'ZONE-A';
             if (product.category === 'Jeans')
                 zone = 'ZONE-B';

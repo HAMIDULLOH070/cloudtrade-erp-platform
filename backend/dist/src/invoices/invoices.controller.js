@@ -24,7 +24,12 @@ let InvoicesController = class InvoicesController {
         this.invoicesService = invoicesService;
     }
     async findAllInvoices(status, search, page, limit) {
-        return this.invoicesService.findAllInvoices({ status, search, page, limit });
+        return this.invoicesService.findAllInvoices({
+            status,
+            search,
+            page,
+            limit,
+        });
     }
     async findOneInvoice(id) {
         return this.invoicesService.findOneInvoice(id);

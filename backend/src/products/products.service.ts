@@ -1,11 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(query: { category?: string; search?: string; page?: string; limit?: string }) {
+  async findAll(query: {
+    category?: string;
+    search?: string;
+    page?: string;
+    limit?: string;
+  }) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -49,6 +54,12 @@ export class ProductsService {
   }
 
   async create(data: any) {
+    if (data.price === undefined || isNaN(Number(data.price))) {
+      throw new BadRequestException("Mahsulot narxi to'g'ri raqam bo'lishi shart.");
+    }
+    if (data.cost === undefined || isNaN(Number(data.cost))) {
+      throw new BadRequestException("Mahsulot tannarxi to'g'ri raqam bo'lishi shart.");
+    }
     return this.prisma.product.create({
       data: {
         name: data.name,
@@ -66,6 +77,12 @@ export class ProductsService {
   }
 
   async update(id: string, data: any) {
+    if (data.price !== undefined && isNaN(Number(data.price))) {
+      throw new BadRequestException("Mahsulot narxi to'g'ri raqam bo'lishi shart.");
+    }
+    if (data.cost !== undefined && isNaN(Number(data.cost))) {
+      throw new BadRequestException("Mahsulot tannarxi to'g'ri raqam bo'lishi shart.");
+    }
     return this.prisma.product.update({
       where: { id },
       data: {
@@ -77,7 +94,10 @@ export class ProductsService {
         color: data.color,
         price: data.price !== undefined ? Number(data.price) : undefined,
         cost: data.cost !== undefined ? Number(data.cost) : undefined,
-        quantityInStock: data.quantityInStock !== undefined ? Number(data.quantityInStock) : undefined,
+        quantityInStock:
+          data.quantityInStock !== undefined
+            ? Number(data.quantityInStock)
+            : undefined,
         supplierId: data.supplierId,
       },
     });
@@ -94,6 +114,6 @@ export class ProductsService {
       select: { category: true },
       distinct: ['category'],
     });
-    return categories.map(c => c.category);
+    return categories.map((c) => c.category);
   }
 }

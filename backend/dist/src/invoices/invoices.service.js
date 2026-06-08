@@ -54,7 +54,9 @@ let InvoicesService = class InvoicesService {
         const invoice = await this.prisma.invoice.findUnique({
             where: { id },
             include: {
-                order: { include: { customer: true, items: { include: { product: true } } } },
+                order: {
+                    include: { customer: true, items: { include: { product: true } } },
+                },
                 payments: true,
             },
         });
@@ -71,12 +73,24 @@ let InvoicesService = class InvoicesService {
             throw new common_1.NotFoundException('Invoice not found');
         if (invoice.status === 'PAID')
             throw new common_1.BadRequestException('Invoice is already paid');
+        if (data.amount === undefined || isNaN(Number(data.amount))) {
+            throw new common_1.BadRequestException("To'lov miqdori to'g'ri raqam bo'lishi shart.");
+        }
         const paymentAmount = Number(data.amount);
         if (paymentAmount <= 0)
-            throw new common_1.BadRequestException('Payment amount must be greater than 0');
+            throw new common_1.BadRequestException("To'lov miqdori 0 dan katta bo'lishi shart.");
         const result = await this.prisma.$transaction(async (tx) => {
-            const paymentCount = await tx.payment.count();
-            const paymentNumber = `PAY-${3000 + paymentCount + 1}`;
+            const latestPayment = await tx.payment.findFirst({
+                orderBy: { createdAt: 'desc' },
+            });
+            let nextPaymentNum = 3001;
+            if (latestPayment && latestPayment.paymentNumber.startsWith('PAY-')) {
+                const lastPaymentNum = parseInt(latestPayment.paymentNumber.replace('PAY-', ''), 10);
+                if (!isNaN(lastPaymentNum)) {
+                    nextPaymentNum = lastPaymentNum + 1;
+                }
+            }
+            const paymentNumber = `PAY-${nextPaymentNum}`;
             const payment = await tx.payment.create({
                 data: {
                     paymentNumber,
@@ -108,7 +122,9 @@ let InvoicesService = class InvoicesService {
         const skip = (page - 1) * limit;
         const [items, total] = await Promise.all([
             this.prisma.payment.findMany({
-                include: { invoice: { include: { order: { include: { customer: true } } } } },
+                include: {
+                    invoice: { include: { order: { include: { customer: true } } } },
+                },
                 skip,
                 take: limit,
                 orderBy: { paymentDate: 'desc' },
@@ -149,6 +165,9 @@ let InvoicesService = class InvoicesService {
         };
     }
     async createExpense(data) {
+        if (data.amount === undefined || isNaN(Number(data.amount))) {
+            throw new common_1.BadRequestException("Xarajat miqdori to'g'ri raqam bo'lishi shart.");
+        }
         return this.prisma.expense.create({
             data: {
                 title: data.title,

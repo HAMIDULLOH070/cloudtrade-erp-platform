@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Param, Body, Query, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -16,7 +26,12 @@ export class PurchaseOrdersController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    return this.ordersService.findAllPurchaseOrders({ status, search, page, limit });
+    return this.ordersService.findAllPurchaseOrders({
+      status,
+      search,
+      page,
+      limit,
+    });
   }
 
   @Get(':id')
@@ -32,7 +47,11 @@ export class PurchaseOrdersController {
 
   @Put(':id')
   @Roles('Admin', 'Warehouse Staff', 'Manager')
-  async updatePurchaseOrder(@Param('id') id: string, @Body() data: any, @Req() req: any) {
+  async updatePurchaseOrder(
+    @Param('id') id: string,
+    @Body() data: any,
+    @Req() req: any,
+  ) {
     return this.ordersService.updatePurchaseOrder(id, data, req.user.id);
   }
 }

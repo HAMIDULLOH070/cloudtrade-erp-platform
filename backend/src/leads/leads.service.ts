@@ -5,7 +5,12 @@ import { PrismaService } from '../prisma.service';
 export class LeadsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(query: { status?: string; search?: string; page?: string; limit?: string }) {
+  async findAll(query: {
+    status?: string;
+    search?: string;
+    page?: string;
+    limit?: string;
+  }) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -91,20 +96,30 @@ export class LeadsService {
     });
 
     // Aggregate values by stage
-    const stages = ['NEW', 'CONTACTED', 'PROPOSAL', 'NEGOTIATION', 'WON', 'LOST'];
-    const summary = stages.reduce((acc, stage) => {
-      acc[stage] = { count: 0, value: 0 };
-      return acc;
-    }, {} as Record<string, { count: number; value: number }>);
+    const stages = [
+      'NEW',
+      'CONTACTED',
+      'PROPOSAL',
+      'NEGOTIATION',
+      'WON',
+      'LOST',
+    ];
+    const summary = stages.reduce(
+      (acc, stage) => {
+        acc[stage] = { count: 0, value: 0 };
+        return acc;
+      },
+      {} as Record<string, { count: number; value: number }>,
+    );
 
-    leads.forEach(l => {
+    leads.forEach((l) => {
       if (summary[l.status]) {
         summary[l.status].count++;
         summary[l.status].value += l.value;
       }
     });
 
-    return Object.keys(summary).map(key => ({
+    return Object.keys(summary).map((key) => ({
       stage: key,
       count: summary[key].count,
       value: Math.round(summary[key].value * 100) / 100,
