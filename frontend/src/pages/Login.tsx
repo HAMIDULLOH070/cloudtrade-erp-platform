@@ -155,12 +155,12 @@ export const Login: React.FC = () => {
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-[#c2410c] to-[#d97706] rounded-lg blur opacity-50 group-hover:opacity-80 transition duration-300"></div>
                 <div className="relative w-14 h-14 rounded-lg bg-[#1a0f0a] border border-[#38231a] flex items-center justify-center font-black text-white tracking-widest text-2xl shadow-xl">
-                  CT
+                  RM
                 </div>
               </div>
             </div>
             <h2 className="text-4xl font-black tracking-tight text-[#faf6f0] sm:text-5xl bg-gradient-to-r from-[#faf6f0] via-[#f4eae1] to-[#c59473] bg-clip-text text-transparent">
-              CloudTrade ERP Platformasi
+              ReModule ERP Platformasi
             </h2>
             <p className="text-sm text-[#ebdcd3] max-w-lg mx-auto leading-relaxed">
               Kompaniyaning operativ jarayonlarini boshqarish portaliga kirish uchun quyidagi rollardan birini tanlang

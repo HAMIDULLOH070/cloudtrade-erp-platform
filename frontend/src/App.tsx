@@ -29,7 +29,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white font-sans text-sm">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-10 h-10 border-4 border-success border-t-transparent rounded-full animate-spin" />
-          <p className="font-bold tracking-wider opacity-90 animate-pulse">TIZIM YUKLANMOQDA (CLOUDTRADE ERP)...</p>
+          <p className="font-bold tracking-wider opacity-90 animate-pulse">TIZIM YUKLANMOQDA (REMODULE ERP)...</p>
         </div>
       </div>
     );

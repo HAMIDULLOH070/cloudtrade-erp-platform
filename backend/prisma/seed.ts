@@ -466,7 +466,7 @@ async function main() {
 
   console.log('Seeding Cloud Resources (DEGRADED, ACTIVE, INACTIVE)...');
   const cloudResources = [
-    { name: 'CloudTrade VPC (Virtual tarmoq)', type: 'tarmoq', status: 'ACTIVE', ipAddress: '10.0.0.0/16', zone: 'us-east-1' },
+    { name: 'ReModule VPC (Virtual tarmoq)', type: 'tarmoq', status: 'ACTIVE', ipAddress: '10.0.0.0/16', zone: 'us-east-1' },
     { name: 'Ochiq quyi tarmoq A', type: 'tarmoq', status: 'ACTIVE', ipAddress: '10.0.1.0/24', zone: 'us-east-1a' },
     { name: 'Yaqob quyi tarmoq A (Yopiq)', type: 'tarmoq', status: 'DEGRADED', ipAddress: '10.0.2.0/24', zone: 'us-east-1a' },
     { name: 'Ilova yuklamasini taqsimlovchi', type: 'tarmoq', status: 'ACTIVE', ipAddress: 'alb-10293.elb.amazonaws.com', zone: 'us-east-1' },

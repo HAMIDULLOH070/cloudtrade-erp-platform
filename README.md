@@ -1,4 +1,4 @@
-# CloudTrade ERP Platform
+# ReModule ERP Platform
 
 A complete, full-stack, cloud-based business management platform designed for a wholesale clothing distribution company. The system simulates a real operating company with several years of realistic seeded data, monthly/yearly reports, interactive dashboards, inventory counts, warehouse zones, B2B customer pipelines, and live cloud infrastructure statuses.
 
@@ -14,14 +14,14 @@ A complete, full-stack, cloud-based business management platform designed for a 
 ## Default Admin Credentials
 
 For easy local testing, log in with the following default administrator credentials:
-* **Email**: `admin@cloudtrade.com`
+* **Email**: `admin@remodule.com`
 * **Password**: `Admin12345`
 
 Other seeded accounts:
-* **Manager**: `manager@cloudtrade.com` / `Manager123`
-* **Warehouse Staff**: `warehouse@cloudtrade.com` / `Warehouse123`
-* **Sales Staff**: `sales@cloudtrade.com` / `Sales123`
-* **Accountant**: `accountant@cloudtrade.com` / `Accountant123`
+* **Manager**: `manager@remodule.com` / `Manager123`
+* **Warehouse Staff**: `warehouse@remodule.com` / `Warehouse123`
+* **Sales Staff**: `sales@remodule.com` / `Sales123`
+* **Accountant**: `accountant@remodule.com` / `Accountant123`
 
 ---
 

@@ -170,11 +170,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <div className="h-16 flex items-center justify-between px-5 border-b border-brand-850 bg-brand-950">
           <Link to="/dashboard" className="flex items-center space-x-3 overflow-hidden">
             <div className="w-8 h-8 rounded bg-success flex items-center justify-center font-bold text-white tracking-wider text-sm flex-shrink-0">
-              CT
+              RM
             </div>
             {!sidebarCollapsed && (
               <div className="animate-in fade-in duration-300">
-                <span className="font-bold text-white text-base tracking-wide block">CloudTrade</span>
+                <span className="font-bold text-white text-base tracking-wide block">ReModule</span>
                 <span className="text-[10px] text-brand-400 block -mt-1 font-bold">ERP PLATFORMA</span>
               </div>
             )}
@@ -354,7 +354,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
               </button>
             </div>
             <div className="h-16 flex items-center px-6 border-b border-brand-850 bg-brand-950">
-              <span className="font-bold text-white text-base">CloudTrade ERP</span>
+              <span className="font-bold text-white text-base">ReModule ERP</span>
             </div>
             <nav className="flex-grow overflow-y-auto px-3 py-6 space-y-6">
               {navigation.map((group) => (

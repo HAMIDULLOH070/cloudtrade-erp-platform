@@ -119,7 +119,7 @@ export const Reports: React.FC = () => {
               {selectedReport === 'crm' && 'CRM sotuv voronkasi va mijozlar bilan aloqalar hisoboti'}
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              CloudTrade tarqatish kompaniyasi | Davr: <span className="font-semibold text-slate-700">Iyun 2025 - Iyun 2026</span>
+              ReModule tarqatish kompaniyasi | Davr: <span className="font-semibold text-slate-700">Iyun 2025 - Iyun 2026</span>
             </p>
           </div>
 
